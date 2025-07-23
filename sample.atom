@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<rss xmlns:itunes="http://www.itunes.com/dtds/podcast-1.0.dtd" xmlns:googleplay="http://www.google.com/schemas/play-podcasts/1.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:sr="http://www.sverigesradio.se/podrss" xmlns:media="http://search.yahoo.com/mrss/" version="2.0">
+  <channel>
+    <itunes:new-feed-url>https://api.sr.se/api/rss/pod/22712</itunes:new-feed-url>
+    <atom:link href="https://api.sr.se/api/rss/pod/22712" rel="self" type="application/rss+xml" />
+    <lastBuildDate>{{now}}</lastBuildDate>
+    <image>
+      <title>USApodden</title>
+      <link>https://www.sverigesradio.se/usapodden</link>
+      <url>https://static-cdn.sr.se/images/4923/d7b2a3f7-77a1-435b-80ce-baf33353be3c.jpg?preset=api-itunes-presentation-image</url>
+    </image>
+    <itunes:image href="https://static-cdn.sr.se/images/4923/d7b2a3f7-77a1-435b-80ce-baf33353be3c.jpg?preset=api-itunes-presentation-image" />
+    <itunes:explicit>false</itunes:explicit>
+    <itunes:summary><![CDATA[Sveriges största och skarpaste podd om amerikansk politik. Lyssna på alla avsnitt i Sveriges Radio Play. Ansvarig utgivare: Klas Wolf-Watz]]></itunes:summary>
+    <itunes:author>Sveriges Radio</itunes:author>
+    <itunes:category text="Society &amp; Culture" />
+    <itunes:owner>
+      <itunes:name>USApodden</itunes:name>
+      <itunes:email>podd@sverigesradio.se</itunes:email>
+    </itunes:owner>
+    <title>USApodden</title>
+    <link>https://www.sverigesradio.se/usapodden</link>
+    <description><![CDATA[Sveriges största och skarpaste podd om amerikansk politik. <a href="https://sverigesradio.se/play/program/4923?utm_source=thirdparty&utm_medium=rss&utm_campaign=program_usapodden">Lyssna på alla avsnitt i Sveriges Radio Play.</a> Ansvarig utgivare: Klas Wolf-Watz]]></description>
+    <language>sv</language>
+    <copyright>Copyright Sveriges Radio 2025. All rights reserved.</copyright>
+    {{- $podcast := .}}
+    {{- range .Episodes}}
+    <item>
+      <title><![CDATA[{{.Title}}]]></title>
+      <description><![CDATA[{{.Description}}]]></description>
+      <link>https://www.sverigesradio.se/artikel/{{.ArticleID}}</link>
+      <guid isPermaLink="false">rss:sr.se/pod/eid/{{.ArticleID}}</guid>
+      <pubDate>{{.PublishedTimestamp}}</pubDate>
+      <itunes:summary><![CDATA[{{.Description}}]]></itunes:summary>
+      <itunes:author>Sveriges Radio</itunes:author>
+      <itunes:image href="{{$podcast.LogoURL}}" />
+      <itunes:duration>{{.DurationFmt}}</itunes:duration>
+      <itunes:subtitle><![CDATA[{{.Subtitle}}]]></itunes:subtitle>
+      <enclosure url="https://sverigesradio.se/topsy/ljudfil/srse/{{.Mp3ID}}.mp3" length="{{.Mp3Size}}" type="audio/mpeg" />
+    </item>
+    {{- end}}
+  </channel>
+</rss>
