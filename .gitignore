@@ -18,3 +18,5 @@ vendor/
 # Go workspace file
 go.work
 
+tmp/
+better-sr-rss
