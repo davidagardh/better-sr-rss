@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<rss xmlns:itunes="http://www.itunes.com/dtds/podcast-1.0.dtd" xmlns:googleplay="http://www.google.com/schemas/play-podcasts/1.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:sr="http://www.sverigesradio.se/podrss" xmlns:media="http://search.yahoo.com/mrss/" version="2.0">
+  <channel>
+    <itunes:new-feed-url>https://localhost:8080/rss/{{.PageName}}</itunes:new-feed-url>
+    <atom:link href="https://localhost:8080/rss/{{.PageName}}" rel="self" type="application/rss+xml" />
+    <lastBuildDate>{{now}}</lastBuildDate>
+    <image>
+      <title>{{.Title}}</title>
+      <link>https://www.sverigesradio.se/{{.PageName}}</link>
+      <url>{{.LogoURL}}</url>
+    </image>
+    <itunes:image href="{{.LogoURL}}" />
+    <itunes:explicit>false</itunes:explicit>
+    <itunes:summary>{{.Summary}}</itunes:summary>
+    <itunes:author>Sveriges Radio</itunes:author>
+    <itunes:category text="Society &amp; Culture" />
+    <itunes:owner>
+      <itunes:name>{{.Title}}</itunes:name>
+      <itunes:email>podd@sverigesradio.se</itunes:email>
+    </itunes:owner>
+    <title>{{.Title}} (better)</title>
+    <link>https://www.sverigesradio.se/{{.PageName}}</link>
+    <description>{{.Summary}}</description>
+    <language>sv</language>
+    <copyright>Copyright Sveriges Radio 2025. All rights reserved.</copyright>
+    {{- $podcast := .}}
+    {{- range .Episodes}}
+    <item>
+      <title>{{.Title}}</title>
+      <description>{{.Description}}</description>
+      <link>https://www.sverigesradio.se/artikel/{{.ArticleID}}</link>
+      <guid isPermaLink="false">rss:sr.se/pod/eid/{{.ArticleID}}</guid>
+      <pubDate>{{.PublishedTimestamp}}</pubDate>
+      <itunes:summary>{{.Description}}</itunes:summary>
+      <itunes:author>Sveriges Radio</itunes:author>
+      <itunes:image href="{{$podcast.LogoURL}}" />
+      <itunes:duration>{{.DurationFmt}}</itunes:duration>
+      <itunes:subtitle>{{.Subtitle}}</itunes:subtitle>
+      <enclosure url="https://sverigesradio.se/topsy/ljudfil/srse/{{.Mp3ID}}.mp3" length="{{.Mp3Size}}" type="audio/mpeg" />
+    </item>
+    {{- end}}
+  </channel>
+</rss>

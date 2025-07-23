@@ -2,17 +2,37 @@ package main
 
 import (
 	"fmt"
+	"log"
+	"strings"
 	"time"
 )
 
+// Podcast stores data used in the <channel> section of RSS feed.
 type Podcast struct {
-	ID       string
-	Title    string
-	Subtitle string
-	LogoURL  string
+	rssURL, atomURL string
+	// Title: <title>
+	Title string
+	// Summary: <itunes:summary>
+	Summary string
+	// LogoURL: <image><url>
+	LogoURL string
+	// PageName: after last / in <link>
+	PageName string
 	Episodes []Episode
 }
 
+func (p *Podcast) FeedURL() string {
+	n := strings.LastIndex(p.PageName, "/")
+	if n == -1 {
+		log.Fatalf("Bad PageURL %q", p.PageName)
+	}
+	name := p.PageName[n+1:]
+	base := "https://localhost:8080/rss/"
+	return base + name
+}
+
+// Episode stores unique attributes for each <item> in the RSS feed.
+// The fields are derived from an <entry> in the atom feed.
 type Episode struct {
 	ArticleID   string
 	Title       string
