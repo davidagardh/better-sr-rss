@@ -7,15 +7,9 @@ import (
 	"strings"
 )
 
-func New(atomUrl, rssURL string) Podcast {
-	p := Podcast{atomURL: atomUrl, rssURL: rssURL}
-	p.UpdatePodcastData()
-
-	return p
-}
-
+// UpdateEpisodesData parses the feed at RssURL and updates all fields except Episodes.
 func (p *Podcast) UpdatePodcastData() {
-	resp, err := http.Get(p.rssURL)
+	resp, err := http.Get(p.RssURL)
 	if err != nil {
 		log.Fatalln("Failed getting RSS feed\n" + err.Error())
 	}
@@ -36,8 +30,10 @@ func (p *Podcast) parseRSS(feed string) {
 	link := getTagContents(feed, "link")
 	n := strings.LastIndex(link, "/")
 	p.PageName = link[n+1:]
+	p.atomURL = "https://api.sr.se/api/rss/program/" + getTagContents(feed, "sr:programid")
 }
 
+// UpdateEpisodesData parses the feed at atomURL and updates Episodes.
 func (p *Podcast) UpdateEpisodesData() {
 	resp, err := http.Get(p.atomURL)
 	if err != nil {
@@ -57,6 +53,8 @@ func (p *Podcast) parseAtom(feed string) {
 
 }
 
+// getTagContents searches source for the first occurance of <tag> and returns all the text from there to </tag> not including the tags.
+// If starting or ending tags are not found, returns empty string.
 func getTagContents(source, tag string) string {
 	_, remain, found := strings.Cut(source, "<"+tag+">")
 	if !found {

@@ -20,8 +20,9 @@ func TestParseRSS(t *testing.T) {
 		<link>link.page/api/name</link>
 		<url>imageurl</url>
 	</image>
+	<sr:programid>5419</sr:programid>
 	`
 	got := Podcast{}
 	got.parseRSS(source)
-	require.Equal(t, Podcast{Title: "A Title", Summary: "A long summary", LogoURL: "imageurl", PageName: "name"}, got)
+	require.Equal(t, Podcast{Title: "A Title", Summary: "A long summary", LogoURL: "imageurl", PageName: "name", atomURL: "https://api.sr.se/api/rss/program/5419"}, got)
 }

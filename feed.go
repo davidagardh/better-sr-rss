@@ -9,7 +9,11 @@ import (
 
 // Podcast stores data used in the <channel> section of RSS feed.
 type Podcast struct {
-	rssURL, atomURL string
+	// RssURL is the starting point for scraping all other data
+	RssURL string
+	// atomURL: <sr:programid>
+	// Is generated from scraping rss and used for finding episodes
+	atomURL string
 	// Title: <title>
 	Title string
 	// Summary: <itunes:summary>
