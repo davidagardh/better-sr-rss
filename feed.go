@@ -38,14 +38,15 @@ func (p *Podcast) FeedURL() string {
 // Episode stores unique attributes for each <item> in the RSS feed.
 // The fields are derived from an <entry> in the atom feed.
 type Episode struct {
-	ArticleID   string
-	Title       string
-	Subtitle    string
-	Description string
-	Duration    time.Duration
-	Published   time.Time
-	Mp3ID       string
-	Mp3Size     uint
+	ArticleID       string
+	Title           string
+	Subtitle        string
+	Description     string
+	EpisodeImageURL string
+	Duration        time.Duration
+	Published       time.Time
+	Mp3ID           string
+	Mp3Size         uint
 }
 
 func (e *Episode) PublishedTimestamp() string {

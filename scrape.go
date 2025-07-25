@@ -4,7 +4,10 @@ import (
 	"io"
 	"log"
 	"net/http"
+	"regexp"
+	"strconv"
 	"strings"
+	"time"
 )
 
 // UpdateEpisodesData parses the feed at RssURL and updates all fields except Episodes.
@@ -46,11 +49,71 @@ func (p *Podcast) UpdateEpisodesData() {
 	if err != nil {
 		log.Fatalln("Failed reading atom feed\n" + err.Error())
 	}
-	p.parseAtom(string(feed))
+
+	articles := getLinkHrefs(string(feed))
+
+	p.Episodes = p.Episodes[:0]
+	for _, v := range articles {
+		r, err := http.Get(v)
+		if err != nil {
+			log.Println("While parsing " + p.Title)
+			log.Fatalln("Failed to get article " + v + ": " + err.Error())
+		}
+		if r.StatusCode != 200 {
+			log.Println("While parsing " + p.Title)
+			log.Println("Failed to get article " + v + ": " + r.Status)
+			continue
+		}
+		text, err := io.ReadAll(r.Body)
+		if err != nil {
+			log.Fatalln("Failed to read article " + err.Error())
+		}
+		episode := parseArticleHtml(string(text))
+
+		episode.ArticleID = getAfterLast(v, "/")
+		p.Episodes = append(p.Episodes, episode)
+	}
+
+	log.Println("Done parsing " + p.Title)
 }
 
-func (p *Podcast) parseAtom(feed string) {
+func getLinkHrefs(feed string) []string {
+	r := regexp.MustCompile(`\s*<link href="(.*?)"\s?/>`)
+	matches := r.FindAllStringSubmatch(feed, -1)
+	hrefs := make([]string, len(matches))
+	for i, v := range matches {
+		hrefs[i] = v[1]
+	}
+	return hrefs
+}
 
+func parseArticleHtml(text string) (e Episode) {
+	e.Mp3ID = getFirstCaptureMatch(text, `<a href="//sverigesradio.se/topsy/ljudfil/srse/(.*)\.mp3"`)
+
+	jsonMetadata := getTagWithAttrubutesContents(text, "script", `type="application/ld+json"`)
+	e.Title = getFirstCaptureMatch(jsonMetadata, `"headline":"(.*?)"`)
+
+	datePublished := getFirstCaptureMatch(jsonMetadata, `"datePublished":"(.*?)"`)
+	published, err := time.Parse("2006-01-02 15:04:05Z", datePublished)
+	if err != nil {
+		log.Println("Failed to parse date published")
+		e.Published = time.Now()
+	} else {
+		e.Published = published
+	}
+
+	imageSection := getFirstCaptureMatch(jsonMetadata, `"image":{(.*?)}`)
+	e.EpisodeImageURL = getFirstCaptureMatch(imageSection, `"url":"(.*?)"`)
+
+	e.Subtitle = getFirstCaptureMatch(text, `<meta name="description" content="(.*)" />`)
+
+	e.Description = getTagWithAttrubutesContents(text, "div", `class="publication-text text-editor-content" `)
+
+	minutes := getFirstCaptureMatch(text, `abbr title="(\d+) min`)
+	duration, _ := strconv.Atoi(minutes)
+	e.Duration = time.Minute * time.Duration(duration)
+
+	return e
 }
 
 // getTagContents searches source for the first occurance of <tag> and returns all the text from there to </tag> not including the tags.
@@ -65,4 +128,33 @@ func getTagContents(source, tag string) string {
 		return ""
 	}
 	return contents
+}
+
+func getTagWithAttrubutesContents(source, tag, attritbutes string) string {
+	_, remain, found := strings.Cut(source, "<"+tag+" "+attritbutes+">")
+	if !found {
+		return ""
+	}
+	contents, _, found := strings.Cut(remain, "</"+tag+">")
+	if !found {
+		return ""
+	}
+	return contents
+}
+
+func getFirstCaptureMatch(text, pattern string) string {
+	r := regexp.MustCompile(pattern)
+	match := r.FindStringSubmatch(text)
+	if len(match) < 2 {
+		return ""
+	}
+	return match[1]
+}
+
+func getAfterLast(text, substring string) string {
+	parts := strings.Split(text, substring)
+	if len(parts) == 1 {
+		return ""
+	}
+	return parts[len(parts)-1]
 }

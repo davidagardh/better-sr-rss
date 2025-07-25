@@ -8,22 +8,22 @@ import (
 	"time"
 )
 
-type Podcasts map[string]Podcast
+type Podcasts map[string]*Podcast
 
 func (ps *Podcasts) Add(rssUrl string) {
 	p := Podcast{RssURL: rssUrl}
 	p.UpdatePodcastData()
-	(*ps)[p.PageName] = p
+	(*ps)[p.PageName] = &p
 }
 
 func main() {
 	podcasts := make(Podcasts)
 	podcasts.Add("https://api.sr.se/api/rss/pod/22712")
 	podcasts.Add("https://api.sr.se/api/rss/pod/34530")
-	podcasts.Add("https://api.sr.se/api/rss/pod/4023")
 	index := make([]string, len(podcasts))
 	for k := range podcasts {
 		index = append(index, k)
+		go podcasts[k].UpdateEpisodesData()
 	}
 	fmt.Println(index)
 

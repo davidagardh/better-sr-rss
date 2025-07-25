@@ -23,17 +23,16 @@
     <description>{{.Summary}}</description>
     <language>sv</language>
     <copyright>Copyright Sveriges Radio 2025. All rights reserved.</copyright>
-    {{- $podcast := .}}
     {{- range .Episodes}}
     <item>
       <title>{{.Title}}</title>
-      <description>{{.Description}}</description>
+      <description><![CDATA[{{.Description}}]]></description>
       <link>https://www.sverigesradio.se/artikel/{{.ArticleID}}</link>
       <guid isPermaLink="false">rss:sr.se/pod/eid/{{.ArticleID}}</guid>
       <pubDate>{{.PublishedTimestamp}}</pubDate>
-      <itunes:summary>{{.Description}}</itunes:summary>
+      <itunes:summary><![CDATA[{{.Description}}]]></itunes:summary>
       <itunes:author>Sveriges Radio</itunes:author>
-      <itunes:image href="{{$podcast.LogoURL}}" />
+      <itunes:image href="{{.EpisodeImageURL}}" />
       <itunes:duration>{{.DurationFmt}}</itunes:duration>
       <itunes:subtitle>{{.Subtitle}}</itunes:subtitle>
       <enclosure url="https://sverigesradio.se/topsy/ljudfil/srse/{{.Mp3ID}}.mp3" length="{{.Mp3Size}}" type="audio/mpeg" />
