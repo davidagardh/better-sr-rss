@@ -20,3 +20,6 @@ go.work
 
 tmp/
 better-sr-rss
+
+# Vim session file
+*.vim
