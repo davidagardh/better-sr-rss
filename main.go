@@ -39,6 +39,8 @@ func main() {
 		}
 	})
 
+	go refreshEpisodesLoop(podcasts)
+
 	http.HandleFunc("/rss/{name}", func(w http.ResponseWriter, r *http.Request) {
 		name := r.PathValue("name")
 		p, ok := podcasts[name]
@@ -60,4 +62,15 @@ func main() {
 
 func Timestamp() string {
 	return time.Now().Format("Mon, 02 Jan 2006 15:04:05 GMT")
+}
+
+func refreshEpisodesLoop(ps Podcasts) {
+	for {
+		time.Sleep(6 * time.Hour)
+		log.Println("Updating episodes...")
+		for k := range ps {
+			ps[k].UpdateEpisodesData()
+		}
+		log.Println("Done updating episodes!")
+	}
 }
