@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"io"
 	"log"
 	"net/http"
@@ -89,30 +90,41 @@ func getLinkHrefs(feed string) []string {
 }
 
 func parseArticleHtml(text string) (e Episode) {
-	e.Mp3ID = getFirstCaptureMatch(text, `<a href="//sverigesradio.se/topsy/ljudfil/srse/(.*)\.mp3"`)
+	// TOOD fix for nextJS rewrite
+	relevantJson := getFirstCaptureMatch(text, `({\\"contentTitle\\":.+?)</script>`)
+	if relevantJson == "" {
+		//log.Println(text)
+		log.Fatalln("Failed to find relevant json in article")
+	}
 
-	jsonMetadata := getTagWithAttrubutesContents(text, "script", `type="application/ld+json"`)
-	e.Title = getFirstCaptureMatch(jsonMetadata, `"headline":"(.*?)"`)
+	e.Mp3ID = getFirstCaptureMatch(relevantJson, `https://www.sverigesradio.se/topsy/ljudfil/(\d+)`)
 
-	datePublished := getFirstCaptureMatch(jsonMetadata, `"datePublished":"(.*?)"`)
-	published, err := time.Parse("2006-01-02 15:04:05Z", datePublished)
+	e.Title = getFirstCaptureMatch(relevantJson, `\\"contentTitle\\":\\"\\\\\\"(.+?)\\\\\\"\\",`)
+
+	datePublished := getFirstCaptureMatch(relevantJson, `\\"publishUtc\\":\\"([0-9\-:TZ]+?)\\",`)
+	published, err := time.Parse("2006-01-02T15:04:05Z", datePublished)
 	if err != nil {
-		log.Println("Failed to parse date published")
+		log.Printf("Failed to parse date published. Article %v\n", e.Title)
 		e.Published = time.Now()
 	} else {
 		e.Published = published
 	}
 
-	imageSection := getFirstCaptureMatch(jsonMetadata, `"image":{(.*?)}`)
-	e.EpisodeImageURL = getFirstCaptureMatch(imageSection, `"url":"(.*?)"`)
+	e.EpisodeImageURL = getFirstCaptureMatch(relevantJson, `\\"imageUrl\\":\\"(.+?)\\",`)
 
-	e.Subtitle = getFirstCaptureMatch(text, `<meta name="description" content="(.*)" />`)
+	e.Subtitle = getFirstCaptureMatch(text, `\\"subtitle\\":\\"(.+?)\\",`)
 
-	e.Description = getTagWithAttrubutesContents(text, "div", `class="publication-text text-editor-content" `)
+	description := `"` + getFirstCaptureMatch(text, `\\"fullDescription\\":\\"(.+?)\\",`) + `"`
+	// Decode unicode characters
+	err = json.Unmarshal([]byte(description), &e.Description)
+	if err != nil {
+		log.Println("Failed to decode description")
+		e.Description = description
+	}
 
-	minutes := getFirstCaptureMatch(text, `abbr title="(\d+) min`)
-	duration, _ := strconv.Atoi(minutes)
-	e.Duration = time.Minute * time.Duration(duration)
+	seconds := getFirstCaptureMatch(text, `\\"duration\\":(\d+),`)
+	duration, _ := strconv.Atoi(seconds)
+	e.Duration = time.Second * time.Duration(duration)
 
 	return e
 }
