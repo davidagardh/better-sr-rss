@@ -20,6 +20,8 @@ func main() {
 	podcasts := make(Podcasts)
 	podcasts.Add("https://api.sr.se/api/rss/pod/22712")
 	podcasts.Add("https://api.sr.se/api/rss/pod/34530")
+	podcasts.Add("https://api.sr.se/api/rss/pod/44054")
+	podcasts.Add("https://api.sr.se/api/rss/pod/21597")
 	index := make([]string, len(podcasts))
 	for k := range podcasts {
 		index = append(index, k)
