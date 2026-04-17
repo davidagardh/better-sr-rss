@@ -18,6 +18,27 @@ func (ps *Podcasts) Add(rssUrl string) {
 	(*ps)[p.PageName] = &p
 }
 
+func Get(url string) (*http.Response, error) {
+	req, err := http.NewRequest("GET", url, nil)
+	if err != nil {
+		log.Fatalf("Failed creating request url %q\n%v\n", url, err.Error())
+	}
+	req.Header.Set("User-Agent", "Mozilla/5.0")
+
+	return http.DefaultClient.Do(req)
+}
+
+func Head(url string) (*http.Response, error) {
+	req, err := http.NewRequest("GET", url, nil)
+	if err != nil {
+		log.Fatalf("Failed creating request url %q\n%v\n", url, err.Error())
+	}
+	req.Header.Set("User-Agent", "Mozilla/5.0")
+	req.Method = "HEAD"
+
+	return http.DefaultClient.Do(req)
+}
+
 func main() {
 	podcasts := make(Podcasts)
 	podcasts.Add("https://api.sr.se/api/rss/pod/22712")

@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"io"
 	"log"
-	"net/http"
 	"regexp"
 	"strconv"
 	"strings"
@@ -13,7 +12,7 @@ import (
 
 // UpdateEpisodesData parses the feed at RssURL and updates all fields except Episodes.
 func (p *Podcast) UpdatePodcastData() {
-	resp, err := http.Get(p.RssURL)
+	resp, err := Get(p.RssURL)
 	if err != nil {
 		log.Fatalln("Failed getting RSS feed\n" + err.Error())
 	}
@@ -39,7 +38,7 @@ func (p *Podcast) parseRSS(feed string) {
 
 // UpdateEpisodesData parses the feed at atomURL and updates Episodes.
 func (p *Podcast) UpdateEpisodesData() {
-	resp, err := http.Get(p.atomURL)
+	resp, err := Get(p.atomURL)
 	if err != nil {
 		log.Fatalln("Failed getting atom feed\n" + err.Error())
 	}
@@ -55,7 +54,7 @@ func (p *Podcast) UpdateEpisodesData() {
 
 	p.Episodes = p.Episodes[:0]
 	for _, v := range articles {
-		r, err := http.Get(v)
+		r, err := Get(v)
 		if err != nil {
 			log.Println("While parsing " + p.Title)
 			log.Fatalln("Failed to get article " + v + ": " + err.Error())
@@ -130,7 +129,7 @@ func parseArticleHtml(text string) (e Episode) {
 }
 
 func getContetLenght(url string) uint {
-	resp, err := http.Head(url)
+	resp, err := Head(url)
 	if err != nil {
 		log.Println("Could not get podcast " + url)
 		return 0
