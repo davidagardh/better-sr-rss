@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"os"
+	"strconv"
 	"text/template"
 	"time"
 )
@@ -67,8 +69,14 @@ func Timestamp() string {
 }
 
 func refreshEpisodesLoop(ps Podcasts) {
+	env := os.Getenv("REFRESH_INTERVAL")
+	waitTime, err := strconv.Atoi(env)
+	if err != nil {
+		waitTime = 12
+	}
+	log.Printf("Refresh interval set to %d hours\n", waitTime)
 	for {
-		time.Sleep(6 * time.Hour)
+		time.Sleep(time.Duration(waitTime) * time.Hour)
 		log.Println("Updating episodes...")
 		for k := range ps {
 			ps[k].UpdateEpisodesData()
